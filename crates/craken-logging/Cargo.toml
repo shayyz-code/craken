@@ -10,4 +10,4 @@ description = "Structured, asynchronous logging for the Craken framework."
 
 [dependencies]
 tracing.workspace = true
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber.workspace = true

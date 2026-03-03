@@ -22,6 +22,21 @@ Thank you for your interest in contributing to Craken! We welcome all contributi
 - Document public APIs with doc comments.
 - Include unit tests for new functionality.
 
+## Publication
+
+To publish all Craken crates to [crates.io](https://crates.io) in the correct order:
+
+1.  **Dry Run**:
+    ```bash
+    make publish-dry
+    ```
+2.  **Publish**:
+    ```bash
+    make publish
+    ```
+
+Ensure you have run `cargo login` and that your working directory is clean.
+
 ## Code of Conduct
 
 Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.

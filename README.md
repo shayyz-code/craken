@@ -102,12 +102,27 @@ We love contributions! Whether you're fixing a bug, improving documentation, or 
 
 Check out our [**Contributing Guide**](CONTRIBUTING.md) to get started.
 
-## Security & Conduct
+## 🛡️ Security & Conduct
 
 - [**Security Policy**](SECURITY.md) — How to report vulnerabilities.
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) — Our commitment to a welcoming environment.
 
-## License
+## 🛠️ For Developers
+
+To publish all Craken crates to [crates.io](https://crates.io) in the correct order:
+
+1.  **Dry Run**:
+    ```bash
+    make publish-dry
+    ```
+2.  **Publish**:
+    ```bash
+    make publish
+    ```
+
+Ensure you have run `cargo login` and that your working directory is clean.
+
+## 📜 License
 
 The Craken framework is open-sourced software licensed under the [Apache License, Version 2.0](LICENSE).
 

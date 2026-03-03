@@ -10,6 +10,7 @@ members = [
     "crates/craken-cli",
     "examples/craken-app",
 ]
+# Exclude example apps from the workspace
 exclude = [
     "my-app",
 ]
@@ -28,16 +29,29 @@ categories = ["web-programming", "asynchronous"]
 
 [workspace.dependencies]
 # Internal crates
-craken-core = { path = "crates/craken-core" }
-craken-http = { path = "crates/craken-http" }
-craken-container = { path = "crates/craken-container" }
-craken-database = { path = "crates/craken-database" }
-craken-cli = { path = "crates/craken-cli" }
-craken-macros = { path = "crates/craken-macros" }
-craken-logging = { path = "crates/craken-logging" }
-craken-config = { path = "crates/craken-config" }
+# NOTE: Publish order is:
+# 1. craken-container
+# 2. craken-macros
+# 3. craken-logging
+# 4. craken-config
+# 5. craken-core
+# 6. craken-http
+# 7. craken-database
+# 8. craken-cli
+craken-core = { version = "0.1.1", path = "crates/craken-core" }
+craken-http = { version = "0.1.1", path = "crates/craken-http" }
+craken-container = { version = "0.1.1", path = "crates/craken-container" }
+craken-database = { version = "0.1.1", path = "crates/craken-database" }
+craken-cli = { version = "0.1.1", path = "crates/craken-cli" }
+craken-macros = { version = "0.1.1", path = "crates/craken-macros" }
+craken-logging = { version = "0.1.1", path = "crates/craken-logging" }
+craken-config = { version = "0.1.1", path = "crates/craken-config" }
 
 # External dependencies (shared versions)
+proc-macro2 = "1.0"
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+heck = "0.4"
 tokio = { version = "1.0", features = ["full"] }
 axum = "0.7"
 serde = { version = "1.0", features = ["derive"] }
@@ -51,3 +65,6 @@ clap = { version = "4.0", features = ["derive"] }
 tower = { version = "0.4", features = ["full"] }
 http = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
+config = "0.13"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+notify = "6.0"

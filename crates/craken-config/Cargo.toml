@@ -10,4 +10,4 @@ description = "Hierarchical configuration management for the Craken framework."
 
 [dependencies]
 serde.workspace = true
-config = "0.13"
+config.workspace = true
