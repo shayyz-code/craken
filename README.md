@@ -2,6 +2,8 @@
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg?style=for-the-badge&logo=rust)](https://www.rust-lang.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
+![LOGO_CRAKEN](https://github.com/user-attachments/assets/a123ab8d-f727-46fd-852e-825d5a277bd1)
+
 ## About Craken
 
 Craken is an opinionated, batteries-included, and production-ready web framework for Rust. It is designed to provide a developer experience similar to [Laravel](https://laravel.com/) or [Spring Boot](https://spring.io/projects/spring-boot), but built idiomatically for the Rust ecosystem.
