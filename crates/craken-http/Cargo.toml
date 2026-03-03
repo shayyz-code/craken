@@ -1,0 +1,23 @@
+[package]
+name = "craken-http"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "HTTP server integration and routing for the Craken framework."
+
+[dependencies]
+craken-core.workspace = true
+craken-container.workspace = true
+axum.workspace = true
+tokio.workspace = true
+tower.workspace = true
+http.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+async-trait.workspace = true

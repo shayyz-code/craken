@@ -1,0 +1,13 @@
+[package]
+name = "craken-logging"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Structured, asynchronous logging for the Craken framework."
+
+[dependencies]
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

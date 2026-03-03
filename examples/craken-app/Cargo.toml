@@ -1,0 +1,27 @@
+[package]
+name = "craken-app"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Example application demonstrating the features of the Craken framework."
+
+[dependencies]
+craken-core.workspace = true
+craken-http.workspace = true
+craken-container.workspace = true
+craken-database.workspace = true
+craken-cli.workspace = true
+craken-macros.workspace = true
+craken-logging.workspace = true
+tokio.workspace = true
+axum.workspace = true
+clap.workspace = true
+async-trait.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+sqlx.workspace = true

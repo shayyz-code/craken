@@ -1,0 +1,21 @@
+[package]
+name = "craken-database"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "SQLx-powered database abstraction and ORM for the Craken framework."
+
+[dependencies]
+craken-core.workspace = true
+craken-container.workspace = true
+craken-http.workspace = true
+craken-macros.workspace = true
+sqlx.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+chrono.workspace = true

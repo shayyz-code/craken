@@ -1,0 +1,17 @@
+[package]
+name = "craken-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "The application kernel and core abstractions for the Craken framework."
+
+[dependencies]
+craken-container.workspace = true
+craken-config.workspace = true
+craken-logging.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+async-trait.workspace = true

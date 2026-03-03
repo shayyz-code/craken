@@ -1,0 +1,50 @@
+[workspace]
+members = [
+    "crates/craken-macros",
+    "crates/craken-container",
+    "crates/craken-core",
+    "crates/craken-database",
+    "crates/craken-http",
+    "crates/craken-config",
+    "crates/craken-logging",
+    "crates/craken-cli",
+    "examples/craken-app",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Aung Min Khant <aungminkhant.shay@gmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/shayyz-code/craken"
+homepage = "https://github.com/shayyz-code/craken"
+description = "An opinionated, batteries-included Rust web framework. Designed for structured, production-ready backend applications."
+keywords = ["web", "framework", "async", "backend", "laravel-like"]
+categories = ["web-programming", "asynchronous"]
+
+[workspace.dependencies]
+# Internal crates
+craken-core = { path = "crates/craken-core" }
+craken-http = { path = "crates/craken-http" }
+craken-container = { path = "crates/craken-container" }
+craken-database = { path = "crates/craken-database" }
+craken-cli = { path = "crates/craken-cli" }
+craken-macros = { path = "crates/craken-macros" }
+craken-logging = { path = "crates/craken-logging" }
+craken-config = { path = "crates/craken-config" }
+
+# External dependencies (shared versions)
+tokio = { version = "1.0", features = ["full"] }
+axum = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+async-trait = "0.1"
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "macros", "chrono"] }
+clap = { version = "4.0", features = ["derive"] }
+tower = { version = "0.4", features = ["full"] }
+http = "1.0"
+chrono = { version = "0.4", features = ["serde"] }

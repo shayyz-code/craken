@@ -1,0 +1,17 @@
+[package]
+name = "craken-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Command-line interface for the Craken framework."
+
+[dependencies]
+craken-core.workspace = true
+clap.workspace = true
+tokio.workspace = true
+notify = "6.0"
+anyhow.workspace = true
+tracing.workspace = true

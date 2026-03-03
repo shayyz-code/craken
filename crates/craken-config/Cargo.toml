@@ -1,0 +1,13 @@
+[package]
+name = "craken-config"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Hierarchical configuration management for the Craken framework."
+
+[dependencies]
+serde.workspace = true
+config = "0.13"
