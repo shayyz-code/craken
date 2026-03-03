@@ -35,21 +35,49 @@ Craken is structured as a Cargo workspace to ensure modularity and clear boundar
 
 - [Rust](https://www.rust-lang.org/tools/install) (latest stable)
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+- [PostgreSQL](https://www.postgresql.org/download/)
 
-### Running the Example
+### 🛠️ Installing the CLI
 
-1. **Setup Database**: Ensure you have a PostgreSQL instance running. You can set the `DATABASE_URL` environment variable:
+To use Craken, first install the unified command-line tool:
+
+```bash
+git clone https://github.com/shayyz-code/craken.git
+cd craken
+cargo install --path crates/craken-cli
+```
+
+### 🚀 Creating a New Project
+
+1. **Scaffold Your App**:
 
    ```bash
-   export DATABASE_URL=postgres://postgres:password@localhost/craken_app
+   craken new my-app
+   cd my-app
    ```
 
-2. **Run the App**:
+2. **Setup Your Environment**:
+   Configure your `DATABASE_URL` in the generated `.env` file.
+
+3. **Run Your App**:
+   For production:
    ```bash
-   cargo run -p craken-app -- serve
+   craken serve
+   ```
+   For development (with hot-reload):
+   ```bash
+   craken dev
    ```
 
-Access the example API at `http://127.0.0.1:8080/users`.
+## 🛠️ Development Tools
+
+The Craken CLI provides several commands to accelerate your development:
+
+- `craken make controller <Name>`: Scaffold a new route controller.
+- `craken make service <Name>`: Scaffold an application service.
+- `craken make module <Name>`: Generate a self-contained module (controller + service).
+- `craken make migration <name>`: Create a new database migration file.
+- `craken migrate`: Run all pending database migrations.
 
 ## Documentation
 

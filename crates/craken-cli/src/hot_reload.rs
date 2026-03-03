@@ -58,10 +58,10 @@ pub async fn run_dev(addr: &str) -> Result<()> {
     }
 
     loop {
-        tracing::info!("Spawning: cargo run -- serve --addr {addr}");
+        tracing::info!("Spawning: cargo run -- serve {addr}");
 
         let mut child = tokio::process::Command::new("cargo")
-            .args(["run", "--", "serve", "--addr", addr])
+            .args(["run", "--", "serve", addr])
             .spawn()
             .map_err(|e| anyhow::anyhow!("Failed to spawn cargo: {e}"))?;
 

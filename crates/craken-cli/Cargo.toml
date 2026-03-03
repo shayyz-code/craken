@@ -8,6 +8,10 @@ repository.workspace = true
 homepage.workspace = true
 description = "Command-line interface for the Craken framework."
 
+[[bin]]
+name = "craken"
+path = "src/main.rs"
+
 [dependencies]
 craken-core.workspace = true
 clap.workspace = true
@@ -15,3 +19,5 @@ tokio.workspace = true
 notify = "6.0"
 anyhow.workspace = true
 tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono.workspace = true

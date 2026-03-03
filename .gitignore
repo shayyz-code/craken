@@ -35,3 +35,7 @@ media/
 *.png
 *.gif
 *.svg
+
+# Test
+my-app/
+test/

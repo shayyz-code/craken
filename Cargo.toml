@@ -10,10 +10,13 @@ members = [
     "crates/craken-cli",
     "examples/craken-app",
 ]
+exclude = [
+    "my-app",
+]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Aung Min Khant <aungminkhant.shay@gmail.com>"]
 license = "Apache-2.0"
