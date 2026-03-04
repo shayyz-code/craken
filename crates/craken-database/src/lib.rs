@@ -1,7 +1,10 @@
 pub use async_trait;
 use craken_http::error::CrakenError;
 pub use craken_macros::Model;
-use sqlx::{postgres::PgPool, sqlite::SqlitePool};
+use sqlx::{postgres::PgPool, sqlite::{SqlitePool, SqlitePoolOptions, SqliteConnectOptions}};
+use std::str::FromStr;
+use std::path::Path;
+use std::fs;
 
 pub mod migration;
 pub mod model;
@@ -21,7 +24,17 @@ impl DatabaseConnection {
             let pool = PgPool::connect(database_url).await?;
             Ok(DatabaseConnection::Postgres(pool))
         } else {
-            let pool = SqlitePool::connect(database_url).await?;
+            if !database_url.contains("memory") {
+                let p = database_url.trim_start_matches("sqlite://").trim_start_matches("sqlite:");
+                let parent = Path::new(p).parent();
+                if let Some(dir) = parent {
+                    if !dir.as_os_str().is_empty() {
+                        let _ = fs::create_dir_all(dir);
+                    }
+                }
+            }
+            let opts = SqliteConnectOptions::from_str(database_url)?.create_if_missing(true);
+            let pool = SqlitePoolOptions::new().connect_with(opts).await?;
             Ok(DatabaseConnection::Sqlite(pool))
         }
     }

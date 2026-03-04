@@ -292,6 +292,11 @@ impl Migration for {name} {{
 /// Scaffold a new project structure in `./<name>`.
 pub fn make_app(name: &str, db_type: &str) -> Result<()> {
     let root = Path::new(name);
+    let crate_name = root
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or(name)
+        .to_string();
     if root.exists() {
         anyhow::bail!("Directory already exists: {root:?}");
     }
@@ -325,22 +330,24 @@ pub struct User {
     // Cargo.toml
     let cargo_toml = format!(
         r#"[package]
-name = "{name}"
+name = "{crate_name}"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-craken-core = {{ git = "https://github.com/shayyz-code/craken.git" }}
-craken-http = {{ git = "https://github.com/shayyz-code/craken.git" }}
-craken-container = {{ git = "https://github.com/shayyz-code/craken.git" }}
-craken-database = {{ git = "https://github.com/shayyz-code/craken.git" }}
-craken-macros = {{ git = "https://github.com/shayyz-code/craken.git" }}
+craken-core    = {{ git = "https://github.com/shayyz-code/craken.git" }}
+craken-http    = {{ git = "https://github.com/shayyz-code/craken.git" }}
+craken-container= {{ git = "https://github.com/shayyz-code/craken.git" }}
+craken-database= {{ git = "https://github.com/shayyz-code/craken.git" }}
+craken-macros  = {{ git = "https://github.com/shayyz-code/craken.git" }}
 craken-logging = {{ git = "https://github.com/shayyz-code/craken.git" }}
-tokio = {{ version = "1.0", features = ["full"] }}
-axum = "0.7"
-serde = {{ version = "1.0", features = ["derive"] }}
-anyhow = "1.0"
-sqlx = {{ version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "sqlite"] }}
+tokio           = {{ version = "1.0", features = ["full"] }}
+axum            = "0.7"
+serde           = {{ version = "1.0", features = ["derive"] }}
+serde_json      = "1.0"
+anyhow          = "1.0"
+sqlx            = {{ version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "sqlite"] }}
+dotenvy         = "0.15"
 "#
     );
     fs::write(root.join("Cargo.toml"), cargo_toml)?;
@@ -349,19 +356,26 @@ sqlx = {{ version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "
     let main_rs = r#"use std::sync::Arc;
 use craken_core::{App, ServiceProvider};
 use craken_container::Container;
-use craken_http::{HttpServer, LoggingMiddleware, AuthMiddleware, JwtAuth, SimpleTokenAuth, AuthenticationProvider, AuthUser, RoleGuardMiddleware, axum};
+use craken_http::{HttpServer, LoggingMiddleware};
 use craken_database::{Database, migration::MigrationRunner};
 use craken_macros::get;
+use crate::controllers::user_controller::UserController;
+
+// ── App Modules ──────────────────────────────────────────────────────────────
 
 mod migrations;
 mod controllers;
 mod services;
 mod models;
 
+// ── Simple Health Route ──────────────────────────────────────────────────────
+
 #[get("/health")]
 pub async fn health() -> &'static str {
     "OK"
 }
+
+// ── Service Registration ─────────────────────────────────────────────────────
 
 pub struct AppServiceProvider {
     db: Arc<Database>,
@@ -370,15 +384,23 @@ pub struct AppServiceProvider {
 impl ServiceProvider for AppServiceProvider {
     fn register(&self, c: &mut Container) {
         c.register_arc(self.db.clone());
+        // Register your application services here
     }
 }
 
+// ── Application Entry Point ──────────────────────────────────────────────────
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    dotenvy::dotenv()?;
+
     craken_logging::Logging::init();
+
+    // Simple argument handling without manual clap in main.rs
     let args: Vec<String> = std::env::args().collect();
     let command = args.get(1).map(|s| s.as_str()).unwrap_or("serve");
-    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite::memory:".to_string());
     let db = Arc::new(Database::connect(&db_url).await?);
 
     match command {
@@ -388,31 +410,12 @@ async fn main() -> anyhow::Result<()> {
             app.boot().await?;
 
             let addr = args.get(2).map(|s| s.as_str()).unwrap_or("127.0.0.1:8080");
-
-            let provider: Arc<dyn AuthenticationProvider> = if let Some(jwt) = JwtAuth::from_env("JWT_SECRET") {
-                Arc::new(jwt)
-            } else if let Some(tok) = SimpleTokenAuth::from_env("API_TOKEN") {
-                Arc::new(tok)
-            } else {
-                Arc::new(SimpleTokenAuth::new("devtoken".to_string()))
-            };
-
-            let public = axum::Router::new().route("/public", axum::routing::get(|| async { "OK" }));
-
-            let protected = axum::Router::new().route("/me", axum::routing::get(|AuthUser(user): AuthUser| async move {
-                axum::Json(serde_json::json!({ "sub": user.subject, "roles": user.roles }))
-            }));
-            let protected = AuthMiddleware::new(Arc::clone(&provider)).apply(protected);
-
-            let admin = axum::Router::new().route("/admin", axum::routing::get(|| async { "ADMIN" }));
-            let admin = AuthMiddleware::new(provider).apply(admin);
-            let admin = RoleGuardMiddleware::new("admin").apply(admin);
+            println!("🦀 Craken application starting on http://{}", addr);
 
             HttpServer::new()
                 .with_middleware(LoggingMiddleware)
-                .merge(public)
-                .merge(protected)
-                .merge(admin)
+                .configure_routes(&HealthRoute)
+                .configure_routes(&UserController)
                 .run(app.into_container(), addr)
                 .await?;
         }
@@ -439,7 +442,7 @@ async fn main() -> anyhow::Result<()> {
 
     // .env
     let db_url = if db_type == "sqlite" {
-        "DATABASE_URL=sqlite:db.sqlite"
+        "DATABASE_URL=sqlite::memory:"
     } else {
         "DATABASE_URL=postgres://postgres:password@localhost/my_app"
     };
@@ -526,99 +529,5 @@ impl Migration for CreateUsers {
     println!("     cd {}", name);
     println!("     cargo run -- serve");
 
-    Ok(())
-}
-
-/// Scaffold a brand-new Craken project with the standard directory layout.
-///
-/// ```text
-/// <name>/
-///   Cargo.toml
-///   src/
-///     main.rs
-///     controllers/mod.rs
-///     services/mod.rs
-///     modules/mod.rs
-///     middleware/mod.rs
-///     models/mod.rs
-/// ```
-pub fn scaffold_project(name: &str) -> Result<()> {
-    let root = Path::new(name);
-    if root.exists() {
-        anyhow::bail!("Directory '{name}' already exists");
-    }
-
-    // Directory tree
-    for sub in &[
-        "src/controllers",
-        "src/services",
-        "src/modules",
-        "src/middleware",
-        "src/models",
-    ] {
-        fs::create_dir_all(root.join(sub))?;
-    }
-
-    // Stub mod.rs files
-    let mod_stub = "// Auto-generated by Craken. Add `pub mod` declarations here.\n";
-    for sub in &["controllers", "services", "modules", "middleware", "models"] {
-        fs::write(root.join(format!("src/{sub}/mod.rs")), mod_stub)?;
-    }
-
-    // Cargo.toml
-    let cargo = format!(
-        r#"[package]
-name    = "{name}"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-craken-core    = "0.1"
-craken-http    = "0.1"
-craken-macros  = "0.1"
-craken-logging = "0.1"
-tokio          = {{ version = "1.0", features = ["full"] }}
-axum           = "0.7"
-serde          = {{ version = "1.0", features = ["derive"] }}
-serde_json     = "1.0"
-anyhow         = "1.0"
-tracing        = "0.1"
-"#
-    );
-    fs::write(root.join("Cargo.toml"), cargo)?;
-
-    // src/main.rs
-    let main_rs = r#"mod controllers;
-mod services;
-mod modules;
-mod middleware;
-mod models;
-
-use craken_core::App;
-use craken_http::{HttpServer, LoggingMiddleware};
-
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    craken_logging::Logging::init();
-
-    let mut app = App::new();
-    app.boot().await?;
-    // app.register_services(&services::AppServiceProvider);
-
-    let container = app.into_container();
-
-    HttpServer::new()
-        .with_middleware(LoggingMiddleware)
-        // .configure_routes(&controllers::YourController)
-        .run(container, "127.0.0.1:8080")
-        .await?;
-
-    Ok(())
-}
-"#;
-    fs::write(root.join("src/main.rs"), main_rs)?;
-
-    println!("✓  Created project '{name}'");
-    println!("   cd {name} && cargo run -- serve");
     Ok(())
 }
