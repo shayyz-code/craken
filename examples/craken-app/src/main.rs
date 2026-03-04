@@ -55,6 +55,12 @@ impl RequestTracker {
     }
 }
 
+impl Default for RequestTracker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ── Service registration ──────────────────────────────────────────────────────
 
 pub struct AppServiceProvider {
@@ -156,7 +162,7 @@ async fn main() -> anyhow::Result<()> {
                 .run(app.into_container(), &addr)
                 .await?;
         }
-        Commands::New { name } => {
+        Commands::New { name, .. } => {
             println!("Scaffolding new project: {}...", name);
         }
         Commands::Dev { addr } => {

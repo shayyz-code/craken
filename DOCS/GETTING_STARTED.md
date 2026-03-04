@@ -12,7 +12,7 @@ Ready to build your first Craken application? Follow these steps to get started.
 
 Currently, Craken is in early development and can be used by cloning the repository and using the crates as path dependencies in your project.
 
-### 🛠️ Installing the CLI
+### Installing the CLI
 
 The `craken-cli` is your primary tool for managing projects:
 
@@ -25,13 +25,16 @@ cd craken
 cargo install --path crates/craken-cli
 ```
 
-## 🚀 Creating Your First Project
+## Creating Your First Project
 
 To create a new project using the CLI:
 
 ```bash
+# For PostgreSQL
 craken new my-app
-cd my-app
+
+# For SQLite
+craken new my-app --db sqlite
 ```
 
 ### 1. Setup Your Environment
@@ -61,7 +64,7 @@ craken dev
 
 Your app will start at `http://127.0.0.1:8080`. Try accessing any routes you've defined!
 
-## 🛠️ Development Tools
+## Development Tools
 
 Accelerate your workflow with code generation:
 

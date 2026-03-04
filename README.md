@@ -39,7 +39,7 @@ Craken is structured as a Cargo workspace to ensure modularity and clear boundar
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [PostgreSQL](https://www.postgresql.org/download/)
 
-### 🛠️ Installing the CLI
+### Installing the CLI
 
 To use Craken, first install the unified command-line tool:
 
@@ -49,13 +49,16 @@ cd craken
 cargo install --path crates/craken-cli
 ```
 
-### 🚀 Creating a New Project
+### Creating a New Project
 
 1. **Scaffold Your App**:
 
    ```bash
+   # For PostgreSQL
    craken new my-app
-   cd my-app
+
+   # For SQLite
+   craken new my-app --db sqlite
    ```
 
 2. **Setup Your Environment**:
@@ -71,7 +74,7 @@ cargo install --path crates/craken-cli
    craken dev
    ```
 
-## 🛠️ Development Tools
+## Development Tools
 
 The Craken CLI provides several commands to accelerate your development:
 
@@ -91,7 +94,7 @@ Explore our comprehensive documentation to learn more about Craken:
 
 > To optimize the documentation, please submit a PR to the documentation.
 
-## 🤝 Contributing
+## Contributing
 
 We love contributions! Whether you're fixing a bug, improving documentation, or proposing a new feature, your help is welcome.
 
@@ -102,12 +105,12 @@ We love contributions! Whether you're fixing a bug, improving documentation, or 
 
 Check out our [**Contributing Guide**](CONTRIBUTING.md) to get started.
 
-## 🛡️ Security & Conduct
+## Security & Conduct
 
 - [**Security Policy**](SECURITY.md) — How to report vulnerabilities.
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) — Our commitment to a welcoming environment.
 
-## 🛠️ For Developers
+## For Contributors
 
 To publish all Craken crates to [crates.io](https://crates.io) in the correct order:
 
@@ -122,7 +125,7 @@ To publish all Craken crates to [crates.io](https://crates.io) in the correct or
 
 Ensure you have run `cargo login` and that your working directory is clean.
 
-## 📜 License
+## License
 
 The Craken framework is open-sourced software licensed under the [Apache License, Version 2.0](LICENSE).
 

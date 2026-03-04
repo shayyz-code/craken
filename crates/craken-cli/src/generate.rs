@@ -254,7 +254,8 @@ pub fn make_migration(name: &str) -> Result<()> {
     }
 
     let template = format!(
-        r#"use craken_database::{{async_trait::async_trait, Database, migration::Migration}};
+        r#"use craken_database::{{async_trait::async_trait, migration::Migration, Database, DatabaseConnection}};
+use sqlx;
 
 pub struct {name};
 
@@ -289,7 +290,7 @@ impl Migration for {name} {{
 // ── `craken new <name>` ───────────────────────────────────────────────────────
 
 /// Scaffold a new project structure in `./<name>`.
-pub fn make_app(name: &str) -> Result<()> {
+pub fn make_app(name: &str, db_type: &str) -> Result<()> {
     let root = Path::new(name);
     if root.exists() {
         anyhow::bail!("Directory already exists: {root:?}");
@@ -298,7 +299,28 @@ pub fn make_app(name: &str) -> Result<()> {
     fs::create_dir_all(root.join("src/controllers"))?;
     fs::create_dir_all(root.join("src/services"))?;
     fs::create_dir_all(root.join("src/migrations"))?;
+    fs::create_dir_all(root.join("src/models"))?;
+    fs::create_dir_all(root.join("src/services"))?;
+    fs::write(root.join("src/services/mod.rs"), "")?;
     fs::create_dir_all(root.join("config"))?;
+
+    // src/models/user.rs
+    let user_model = r#"use craken_database::Model;
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Deserialize, Serialize, FromRow, Model, Clone)]
+#[table("users")]
+pub struct User {
+    pub id: i64,
+    pub name: String,
+    pub email: String,
+}
+"#;
+    fs::write(root.join("src/models/user.rs"), user_model)?;
+
+    // src/models/mod.rs
+    fs::write(root.join("src/models/mod.rs"), "pub mod user;\n")?;
 
     // Cargo.toml
     let cargo_toml = format!(
@@ -318,6 +340,7 @@ tokio = {{ version = "1.0", features = ["full"] }}
 axum = "0.7"
 serde = {{ version = "1.0", features = ["derive"] }}
 anyhow = "1.0"
+sqlx = {{ version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "sqlite"] }}
 "#
     );
     fs::write(root.join("Cargo.toml"), cargo_toml)?;
@@ -329,12 +352,14 @@ use craken_container::Container;
 use craken_http::{HttpServer, LoggingMiddleware};
 use craken_database::{Database, migration::MigrationRunner};
 use craken_macros::get;
+use crate::controllers::user_controller::UserController;
 
 // ── App Modules ──────────────────────────────────────────────────────────────
 
 mod migrations;
 mod controllers;
 mod services;
+mod models;
 
 // ── Simple Health Route ──────────────────────────────────────────────────────
 
@@ -381,19 +406,19 @@ async fn main() -> anyhow::Result<()> {
             HttpServer::new()
                 .with_middleware(LoggingMiddleware)
                 .configure_routes(&HealthRoute)
+                .configure_routes(&UserController)
                 .run(app.into_container(), addr)
                 .await?;
         }
         "migrate" => {
             let mut runner = MigrationRunner::new();
-            // TODO: Register migrations here
-            // runner.add(Box::new(migrations::m20231012_create_users::CreateUsers));
+            runner.add(Box::new(migrations::m20231012_create_users::CreateUsers));
             runner.run_pending(&db).await?;
             println!("✓  Migrations complete");
         }
         "rollback" => {
             let mut runner = MigrationRunner::new();
-            // TODO: Register migrations here
+            runner.add(Box::new(migrations::m20231012_create_users::CreateUsers));
             runner.rollback_last(&db).await?;
             println!("✓  Rollback complete");
         }
@@ -407,15 +432,88 @@ async fn main() -> anyhow::Result<()> {
     fs::write(root.join("src/main.rs"), main_rs)?;
 
     // .env
+    let db_url = if db_type == "sqlite" {
+        "DATABASE_URL=sqlite:db.sqlite"
+    } else {
+        "DATABASE_URL=postgres://postgres:password@localhost/my_app"
+    };
+    fs::write(root.join(".env"), format!("{}\n", db_url))?;
+
+    // src/controllers/user_controller.rs
+    let user_controller = r#"use craken_http::{{CrakenError}};
+use craken_macros::{{controller}};
+
+pub struct UserController;
+
+#[controller]
+impl UserController {}
+"#;
     fs::write(
-        root.join(".env"),
-        "DATABASE_URL=postgres://postgres:password@localhost/my_app\n",
+        root.join("src/controllers/user_controller.rs"),
+        user_controller,
     )?;
 
-    // src/controllers/mod.rs, src/services/mod.rs, src/migrations/mod.rs
-    fs::write(root.join("src/controllers/mod.rs"), "")?;
-    fs::write(root.join("src/services/mod.rs"), "")?;
-    fs::write(root.join("src/migrations/mod.rs"), "")?;
+    // src/controllers/mod.rs
+    fs::write(
+        root.join("src/controllers/mod.rs"),
+        "pub mod user_controller;\n",
+    )?;
+
+    // src/migrations/m20231012_create_users.rs
+    let user_migration = r#"use craken_database::{async_trait::async_trait, migration::Migration, Database, DatabaseConnection};
+use sqlx;
+
+pub struct CreateUsers;
+
+#[async_trait]
+impl Migration for CreateUsers {
+    fn name(&self) -> &'static str {
+        "20231012_create_users"
+    }
+
+    async fn up(&self, db: &Database) -> anyhow::Result<()> {
+        let query = match db.pool() {
+            DatabaseConnection::Postgres(_) => {
+                "CREATE TABLE IF NOT EXISTS users (id BIGSERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE)"
+            }
+            DatabaseConnection::Sqlite(_) => {
+                "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE)"
+            }
+        };
+        match db.pool() {
+            DatabaseConnection::Postgres(pool) => {
+                sqlx::query(query).execute(pool).await?;
+            }
+            DatabaseConnection::Sqlite(pool) => {
+                sqlx::query(query).execute(pool).await?;
+            }
+        }
+        Ok(())
+    }
+
+    async fn down(&self, db: &Database) -> anyhow::Result<()> {
+        match db.pool() {
+            DatabaseConnection::Postgres(pool) => {
+                sqlx::query("DROP TABLE IF EXISTS users").execute(pool).await?;
+            }
+            DatabaseConnection::Sqlite(pool) => {
+                sqlx::query("DROP TABLE IF EXISTS users").execute(pool).await?;
+            }
+        }
+        Ok(())
+    }
+}
+"#;
+    fs::write(
+        root.join("src/migrations/m20231012_create_users.rs"),
+        user_migration,
+    )?;
+
+    // src/migrations/mod.rs
+    fs::write(
+        root.join("src/migrations/mod.rs"),
+        "pub mod m20231012_create_users;\n",
+    )?;
 
     println!("✓  Created new Craken project in: {}", name);
     println!("   Next steps:");

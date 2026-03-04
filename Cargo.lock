@@ -381,7 +381,7 @@ dependencies = [
 
 [[package]]
 name = "craken-app"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -403,7 +403,7 @@ dependencies = [
 
 [[package]]
 name = "craken-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "chrono",
@@ -417,7 +417,7 @@ dependencies = [
 
 [[package]]
 name = "craken-config"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "config",
  "serde",
@@ -425,14 +425,14 @@ dependencies = [
 
 [[package]]
 name = "craken-container"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
 ]
 
 [[package]]
 name = "craken-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -444,7 +444,7 @@ dependencies = [
 
 [[package]]
 name = "craken-database"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -460,7 +460,7 @@ dependencies = [
 
 [[package]]
 name = "craken-http"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -478,7 +478,7 @@ dependencies = [
 
 [[package]]
 name = "craken-logging"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "tracing",
  "tracing-subscriber",
@@ -486,7 +486,7 @@ dependencies = [
 
 [[package]]
 name = "craken-macros"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "heck 0.4.1",
  "proc-macro2",

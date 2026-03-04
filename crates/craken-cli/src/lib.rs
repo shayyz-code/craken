@@ -23,6 +23,9 @@ pub enum Commands {
     New {
         /// Project name (used as the crate name and root directory).
         name: String,
+        /// The database to use.
+        #[arg(long, default_value = "postgres")]
+        db: String,
     },
 
     /// Start the production HTTP server.

@@ -10,8 +10,8 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::New { name } => {
-            craken_cli::generate::make_app(&name)?;
+        Commands::New { name, db } => {
+            craken_cli::generate::make_app(&name, &db)?;
         }
         Commands::Serve { addr } => {
             println!("🦀 Starting Craken server on http://{}", addr);
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
             }
         },
         Commands::Migrate => {
-            println!("🏗️ Running migrations...");
+            println!("Running migrations...");
             let mut child = tokio::process::Command::new("cargo")
                 .arg("run")
                 .arg("--")
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
             child.wait().await?;
         }
         Commands::Rollback => {
-            println!("⏪ Rolling back last migration...");
+            println!("Rolling back last migration...");
             let mut child = tokio::process::Command::new("cargo")
                 .arg("run")
                 .arg("--")
