@@ -116,3 +116,36 @@ impl AuthenticationProvider for SimpleTokenAuth {
         }
     }
 }
+
+pub struct RoleGuardMiddleware {
+    role: String,
+}
+
+impl RoleGuardMiddleware {
+    pub fn new(role: impl Into<String>) -> Self {
+        Self { role: role.into() }
+    }
+}
+
+impl CrakenMiddleware for RoleGuardMiddleware {
+    fn apply(&self, router: Router<Arc<Container>>) -> Router<Arc<Container>> {
+        let role = self.role.clone();
+        router.layer(axum::middleware::from_fn(
+            move |req: Request, next: Next| {
+                let role = role.clone();
+                async move {
+                    let has = req
+                        .extensions()
+                        .get::<Principal>()
+                        .map(|p| p.roles.iter().any(|r| r == &role))
+                        .unwrap_or(false);
+                    if has {
+                        next.run(req).await
+                    } else {
+                        CrakenError::Forbidden("forbidden".to_string()).into_response()
+                    }
+                }
+            },
+        ))
+    }
+}

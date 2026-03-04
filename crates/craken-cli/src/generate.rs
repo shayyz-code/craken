@@ -349,26 +349,19 @@ sqlx = {{ version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "
     let main_rs = r#"use std::sync::Arc;
 use craken_core::{App, ServiceProvider};
 use craken_container::Container;
-use craken_http::{HttpServer, LoggingMiddleware};
+use craken_http::{HttpServer, LoggingMiddleware, AuthMiddleware, JwtAuth, SimpleTokenAuth, AuthenticationProvider, AuthUser, RoleGuardMiddleware, axum};
 use craken_database::{Database, migration::MigrationRunner};
 use craken_macros::get;
-use crate::controllers::user_controller::UserController;
-
-// ── App Modules ──────────────────────────────────────────────────────────────
 
 mod migrations;
 mod controllers;
 mod services;
 mod models;
 
-// ── Simple Health Route ──────────────────────────────────────────────────────
-
 #[get("/health")]
 pub async fn health() -> &'static str {
     "OK"
 }
-
-// ── Service Registration ─────────────────────────────────────────────────────
 
 pub struct AppServiceProvider {
     db: Arc<Database>,
@@ -377,20 +370,14 @@ pub struct AppServiceProvider {
 impl ServiceProvider for AppServiceProvider {
     fn register(&self, c: &mut Container) {
         c.register_arc(self.db.clone());
-        // Register your application services here
     }
 }
-
-// ── Application Entry Point ──────────────────────────────────────────────────
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     craken_logging::Logging::init();
-
-    // Simple argument handling without manual clap in main.rs
     let args: Vec<String> = std::env::args().collect();
     let command = args.get(1).map(|s| s.as_str()).unwrap_or("serve");
-
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db = Arc::new(Database::connect(&db_url).await?);
 
@@ -401,12 +388,31 @@ async fn main() -> anyhow::Result<()> {
             app.boot().await?;
 
             let addr = args.get(2).map(|s| s.as_str()).unwrap_or("127.0.0.1:8080");
-            println!("🦀 Craken application starting on http://{}", addr);
+
+            let provider: Arc<dyn AuthenticationProvider> = if let Some(jwt) = JwtAuth::from_env("JWT_SECRET") {
+                Arc::new(jwt)
+            } else if let Some(tok) = SimpleTokenAuth::from_env("API_TOKEN") {
+                Arc::new(tok)
+            } else {
+                Arc::new(SimpleTokenAuth::new("devtoken".to_string()))
+            };
+
+            let public = axum::Router::new().route("/public", axum::routing::get(|| async { "OK" }));
+
+            let protected = axum::Router::new().route("/me", axum::routing::get(|AuthUser(user): AuthUser| async move {
+                axum::Json(serde_json::json!({ "sub": user.subject, "roles": user.roles }))
+            }));
+            let protected = AuthMiddleware::new(Arc::clone(&provider)).apply(protected);
+
+            let admin = axum::Router::new().route("/admin", axum::routing::get(|| async { "ADMIN" }));
+            let admin = AuthMiddleware::new(provider).apply(admin);
+            let admin = RoleGuardMiddleware::new("admin").apply(admin);
 
             HttpServer::new()
                 .with_middleware(LoggingMiddleware)
-                .configure_routes(&HealthRoute)
-                .configure_routes(&UserController)
+                .merge(public)
+                .merge(protected)
+                .merge(admin)
                 .run(app.into_container(), addr)
                 .await?;
         }

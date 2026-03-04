@@ -2,16 +2,21 @@ pub mod auth;
 pub mod context;
 pub mod error;
 pub mod inject;
+pub mod jwt;
 pub mod middleware;
 pub mod server;
 pub mod validated;
 
 // ── Flat re-exports for ergonomic imports ─────────────────────────────────────
 
-pub use auth::{AuthMiddleware, AuthUser, AuthenticationProvider, Principal, SimpleTokenAuth};
+pub use auth::{
+    AuthMiddleware, AuthUser, AuthenticationProvider, Principal, RoleGuardMiddleware,
+    SimpleTokenAuth,
+};
 pub use context::RequestContext;
 pub use error::CrakenError;
 pub use inject::Inject;
+pub use jwt::JwtAuth;
 pub use middleware::{CrakenMiddleware, LoggingMiddleware, MiddlewareStack};
 pub use server::{HttpServer, RouteProvider};
 pub use validated::{Validate, Validated};
