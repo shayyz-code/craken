@@ -55,6 +55,24 @@ async fn main() -> Result<()> {
                 .spawn()?;
             child.wait().await?;
         }
+        Commands::MigrateRefresh => {
+            println!("Refreshing migrations...");
+            let mut child = tokio::process::Command::new("cargo")
+                .arg("run")
+                .arg("--")
+                .arg("migrate:refresh")
+                .spawn()?;
+            child.wait().await?;
+        }
+        Commands::Seed => {
+            println!("Seeding database...");
+            let mut child = tokio::process::Command::new("cargo")
+                .arg("run")
+                .arg("--")
+                .arg("seed")
+                .spawn()?;
+            child.wait().await?;
+        }
     }
 
     Ok(())

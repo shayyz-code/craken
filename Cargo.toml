@@ -8,7 +8,6 @@ members = [
     "crates/craken-config",
     "crates/craken-logging",
     "crates/craken-cli",
-    "examples/craken-app",
 ]
 # Exclude example apps from the workspace
 exclude = [
@@ -17,7 +16,7 @@ exclude = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Aung Min Khant <aungminkhant.shay@gmail.com>"]
 license = "Apache-2.0"

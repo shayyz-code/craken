@@ -58,6 +58,13 @@ pub enum Commands {
     /// Rollback the last database migration.
     #[command(name = "migrate:rollback")]
     Rollback,
+
+    /// Refresh database by rolling back then re-running all migrations.
+    #[command(name = "migrate:refresh")]
+    MigrateRefresh,
+
+    /// Run database seeders.
+    Seed,
 }
 
 /// Targets for `craken make <target> <Name>`.

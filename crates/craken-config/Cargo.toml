@@ -11,3 +11,4 @@ description = "Hierarchical configuration management for the Craken framework."
 [dependencies]
 serde.workspace = true
 config.workspace = true
+dotenvy = "0.15"

@@ -3,6 +3,7 @@ pub mod error;
 pub mod inject;
 pub mod middleware;
 pub mod server;
+pub mod validated;
 
 // ── Flat re-exports for ergonomic imports ─────────────────────────────────────
 
@@ -11,6 +12,7 @@ pub use error::CrakenError;
 pub use inject::Inject;
 pub use middleware::{CrakenMiddleware, LoggingMiddleware, MiddlewareStack};
 pub use server::{HttpServer, RouteProvider};
+pub use validated::{Validate, Validated};
 
 // ── Crate re-exports used by `craken-macros` generated code ───────────────────
 //

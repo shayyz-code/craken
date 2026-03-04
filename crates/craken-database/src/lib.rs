@@ -6,6 +6,7 @@ use sqlx::{postgres::PgPool, sqlite::SqlitePool};
 pub mod migration;
 pub mod model;
 pub mod repository;
+pub mod seeder;
 
 /// Enum for different database connection pools.
 #[derive(Clone)]

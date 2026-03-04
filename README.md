@@ -6,7 +6,7 @@
 
 ## About Craken
 
-Craken is an opinionated, batteries-included, and production-ready web framework for Rust. It is designed to provide a developer experience similar to [Laravel](https://laravel.com/) or [Spring Boot](https://spring.io/projects/spring-boot), but built idiomatically for the Rust ecosystem.
+Craken is an opinionated and batteries-included web framework for Rust. It is designed to provide a developer experience similar to [Laravel](https://laravel.com/) or [Spring Boot](https://spring.io/projects/spring-boot), but built idiomatically for the Rust ecosystem.
 
 We welcome stars, PRs, and issues!
 
@@ -130,5 +130,5 @@ Ensure you have run `cargo login` and that your working directory is clean.
 The Craken framework is open-sourced software licensed under the [Apache License, Version 2.0](LICENSE).
 
 <p align="center">
-  <em>Made with ❤️ for the Rust community.</em>
+  <em>Made with ❤️ but not for the Rust community.</em>
 </p>
