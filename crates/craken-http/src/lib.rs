@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod context;
 pub mod error;
 pub mod inject;
@@ -7,6 +8,7 @@ pub mod validated;
 
 // ── Flat re-exports for ergonomic imports ─────────────────────────────────────
 
+pub use auth::{AuthMiddleware, AuthUser, AuthenticationProvider, Principal, SimpleTokenAuth};
 pub use context::RequestContext;
 pub use error::CrakenError;
 pub use inject::Inject;
